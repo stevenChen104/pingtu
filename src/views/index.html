@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+        <link href="https://fonts.googleapis.com/css?family=Noto+Sans+TC&display=swap" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="./css/common.css">
+        <script src="./javascripts/lodash.js"></script>
+        <script src="./javascripts/axios.js"></script>
+        <script src="./javascripts/common.js"></script>
+    </head>
+    <body>
+        <div class="header">
+            <div class="logo"></div>
+            <div class="system-name"></div>
+        </div>
+        <div class="outside-container">
+            <div class="container">
+                <div class="input-area">
+                    <div class="label"></div>
+                    <div class="input-container">
+                        <input type="file" accept="image/*" id="uploadFile" multiple />
+                    </div>
+                </div>
+                <div class="sort-area">
+                    <div class="sort-container">
+                        <div class="sort-item" >
+                            <input type="radio" name="sort" /><span>依檔名</span>
+                        </div>
+                        <div class="sort-item" >
+                            <input type="radio" name="sort" /><span>自訂</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="preview-area">
+                    <!--
+                    <div class="image-container">
+                        <div class="preview-image"></div>
+                        <div class="file-name"></div>
+                    </div>
+                    -->
+                </div>
+                <div class="submit-area">
+                    <button id="submitButton" onclick="pingtu()">送出</button>
+                </div>
+                <div class="result-area">
+                    <canvas id="resultImage"></canvas>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
