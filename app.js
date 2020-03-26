@@ -4,8 +4,9 @@ var livereload = require('livereload');
 var server = livereload.createServer();
 server.watch(__dirname + "/src");
 const app = express();
+const PORT = process.env.PORT || 3000;
 
-app.listen(80, function() {
+app.listen(PORT, function() {
     app.get('/', function(req, res) {
         res.sendFile('index.html', {root : __dirname + '/dist'});
     });
