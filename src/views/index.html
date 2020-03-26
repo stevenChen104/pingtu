@@ -11,11 +11,17 @@
     </head>
     <body>
         <div class="header">
-            <div class="logo"></div>
-            <div class="system-name"></div>
+            <div>
+                <div class="logo"></div>
+                <div class="system-name">PHOTO PSYCHO</div>
+            </div>
         </div>
         <div class="outside-container">
             <div class="container">
+                <div class="intro-area">
+                    <div class="intro-title">一頁式網站圖片生成器</div>
+                    <div class="intro-word">還在用PPT和WORD拼圖嗎？試試看更有效率的工具吧</div>
+                </div>
                 <div class="input-area">
                     <div class="label"></div>
                     <div class="input-container">
@@ -25,27 +31,58 @@
                 <div class="sort-area">
                     <div class="sort-container">
                         <div class="sort-item" >
-                            <input type="radio" name="sort" /><span>依檔名</span>
+                            <input type="radio" name="sort" value="byUpload" checked/><span onclick="changeSortType('byUpload')">依上傳順序</span>
                         </div>
                         <div class="sort-item" >
-                            <input type="radio" name="sort" /><span>自訂</span>
+                            <input type="radio" name="sort" value="byName" /><span onclick="changeSortType('byName')">依數字檔名</span>
                         </div>
+                        <div class="sort-item hide" >
+                            <input type="radio" name="sort" value="byUser"/><span onclick="changeSortType('byUser')">自訂</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="filter-area hide">
+                    <div class="filter-container">
+                        <div class="label">檔名為：</div>
+                        <input type="text" name="pre-word" placeholder="投影片_" />
+                        <div class="label">數字編號</div>
+                        <input type="text" name="pre-word" placeholder="若沒有則空白" />
+                        <div class="label"></div>
                     </div>
                 </div>
                 <div class="preview-area">
-                    <!--
-                    <div class="image-container">
-                        <div class="preview-image"></div>
-                        <div class="file-name"></div>
+                    <div class="upload-item" onclick="triggerUpload()">
+                        <div class="add-icon"></div>
+                        <div class="add-word">新增圖片(可多選)</div>
                     </div>
-                    -->
+                    <span></span>
                 </div>
                 <div class="submit-area">
-                    <button id="submitButton" onclick="pingtu()">送出</button>
+                    <button id="submitButton" class="grey-button cancel-button" onclick="clearImages()">清除全部</button>
+                    <button id="submitButton" class="blue-button send-button" onclick="pingtu()">開始拼圖</button>
                 </div>
-                <div class="result-area">
-                    <canvas id="resultImage"></canvas>
+                <div class="result-area hide">
+                    <div class="gradient-grep"></div>
+                    <div class="result-container">
+                        <div class="result-title">你完成了！</div>
+                        <div class="result-word">按右鍵可另存圖片🥰</div>
+                    </div>
+                    <div class="result-image-container">
+                        <canvas id="resultImage"></canvas>
+                    </div>
                 </div>
+            </div>
+        </div>
+        <div class="modal hide" id="nothing">
+            <div class="modal-container">
+                <div class="modal-title">可是你沒有放入圖片呀   🤔</div>
+                <div class="modal-content"></div>
+            </div>
+        </div>
+        <div class="modal hide" id="welldone">
+            <div class="modal-container">
+                <div class="modal-title">你完成了！</div>
+                <div class="modal-content">按右鍵可另存圖片🥰</div>
             </div>
         </div>
     </body>
