@@ -5,7 +5,7 @@ var server = livereload.createServer();
 server.watch(__dirname + "/src");
 const app = express();
 
-app.listen(3000, function() {
+app.listen(80, function() {
     app.get('/', function(req, res) {
         res.sendFile('index.html', {root : __dirname + '/dist'});
     });
