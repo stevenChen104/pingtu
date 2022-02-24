@@ -1,8 +1,8 @@
 var file_seq = 0;
 var promises = [];
 
-window.addEventListener('load', function() {
-    document.querySelector('#uploadFile').addEventListener('change' ,function() {
+window.addEventListener('load', function () {
+    document.querySelector('#uploadFile').addEventListener('change', function () {
         uploadNewFile(this);
     });
 });
@@ -25,8 +25,8 @@ function uploadNewFile(input) {
 }
 
 function sortFilesByName(files) {
-    for(var i=0; i < files.length; i++) {
-        files[i].seq = Number(files[i].name.replace(/\D/g,''));
+    for (var i = 0; i < files.length; i++) {
+        files[i].seq = Number(files[i].name.replace(/\D/g, ''));
     }
     files = _.orderBy(files, ['seq'], ['asc']);
     return files;
@@ -34,7 +34,7 @@ function sortFilesByName(files) {
 
 function setupReader(files, pos) {
     var reader = new FileReader();
-    reader.onload = function(e){
+    reader.onload = function (e) {
         readAndLoadFile(e, files, pos);
     };
     reader.readAsDataURL(files[pos]);
@@ -58,15 +58,15 @@ function readAndLoadFile(e, files, pos) {
     render(node, template, 'beforebegin');
     addSeqToPreviewer();
     slider.scrollLeft = slider.scrollWidth;
-    if(pos < files.length - 1) {
+    if (pos < files.length - 1) {
         setupReader(files, pos + 1);
     }
 }
 
 function addSeqToPreviewer() {
     var _containers = document.querySelectorAll('.preview-area .image-container');
-    for(var i=0; i < _containers.length; i++) {
-        _containers[i].querySelector('.file-seq').innerText = i + 1; 
+    for (var i = 0; i < _containers.length; i++) {
+        _containers[i].querySelector('.file-seq').innerText = i + 1;
     }
 }
 
@@ -97,7 +97,7 @@ function pingtu() {
         var total_width = 0;
         if (images.length > 0) {
             // 調整畫布大小
-            _.forEach(images, function(img) {
+            _.forEach(images, function (img) {
                 var this_height = img.height;
                 var this_width = img.width;
                 total_width = this_width > total_width ? this_width : total_width;
@@ -110,7 +110,7 @@ function pingtu() {
             // 拼接圖片
             total_height = 0;
             total_width = 0;
-            _.forEach(images, function(img) {
+            _.forEach(images, function (img) {
                 var this_height = img.height;
                 var this_width = img.width;
                 ctx.drawImage(img, total_width, total_height, this_width, this_height);
@@ -136,7 +136,7 @@ function removeImageContainer(ele) {
 function clearImages() {
     var _remove_buttons = document.querySelectorAll('.preview-area .image-container .remove-icon');
     var result_area = document.querySelector('.result-area');
-    _.forEach(_remove_buttons, function(button) {
+    _.forEach(_remove_buttons, function (button) {
         button.click();
     });
     result_area.classList.add('hide');
@@ -145,7 +145,7 @@ function clearImages() {
 function showWhile(modalName) {
     var modal = document.querySelector('#' + modalName);
     fadeIn(modal);
-    window.setTimeout(function() {
+    window.setTimeout(function () {
         fadeOut(modal);
     }, 1500);
 }
@@ -159,8 +159,7 @@ function fadeIn(el) {
         last = +new Date();
         if (+el.style.opacity < 1) {
             (window.requestAnimationFrame && requestAnimationFrame(tick)) || setTimeout(tick, 1);
-        }
-        else {
+        } else {
             el.style.opacity = 1;
         }
     };
@@ -175,8 +174,7 @@ function fadeOut(el) {
         last = +new Date();
         if (+el.style.opacity > 0) {
             (window.requestAnimationFrame && requestAnimationFrame(tick)) || setTimeout(tick, 1);
-        }
-        else {
+        } else {
             el.style.opacity = 0;
             el.classList.add('hide');
         }
