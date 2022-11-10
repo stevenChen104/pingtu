@@ -1,5 +1,6 @@
 {
   "name": "pingtu",
+  "type": "module",
   "version": "1.0.0",
   "engines": {
     "npm": "6.9.2"

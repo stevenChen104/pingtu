@@ -1,92 +1,5 @@
-// helper
+import { render, showWhile, getBase64 } from './util.js'
 
-const render = (node, appendElement, position = 'beforeend') => {
-  if (!node || !appendElement) return
-  if (position) {
-    node.insertAdjacentElement(position, appendElement)
-  }
-}
-
-const showWhile = (modalName) => {
-  const modal = document.querySelector('#' + modalName)
-  fadeIn(modal)
-  window.setTimeout(() => {
-    fadeOut(modal)
-  }, 1500)
-}
-
-const fadeIn = (el) => {
-  el.classList.remove('hide')
-  el.style.opacity = 0
-  let last = +new Date()
-  const tick = () => {
-    el.style.opacity = +el.style.opacity + (new Date() - last) / 100
-    last = +new Date()
-    if (+el.style.opacity < 1) {
-      (window.requestAnimationFrame && requestAnimationFrame(tick)) || setTimeout(tick, 1)
-    } else {
-      el.style.opacity = 1
-    }
-  }
-  tick()
-}
-
-const fadeOut = (el) => {
-  el.style.opacity = 1
-  let last = +new Date()
-  const tick = () => {
-    el.style.opacity = +el.style.opacity - (new Date() - last) / 100
-    last = +new Date()
-    if (+el.style.opacity > 0) {
-      (window.requestAnimationFrame && requestAnimationFrame(tick)) || setTimeout(tick, 1)
-    } else {
-      el.style.opacity = 0
-      el.classList.add('hide')
-    }
-  }
-  tick()
-}
-
-const triggerUpload = () => {
-  document.querySelector('.input-area input[type=file]').click()
-}
-
-const getSortType = () => {
-  return document.querySelector('input[type=radio][name="sort"]:checked').value
-}
-
-const hideResultArea = () => {
-  document.querySelector('.result-area').classList.add('hide')
-}
-
-const clearPreviewElement = () => {
-  const imageContainers = document.querySelectorAll('.image-container')
-
-  imageContainers.forEach((container) => {
-    container.remove()
-  })
-}
-
-const getBase64 = (file) => {
-  return new Promise((resolve) => {
-    const reader = new FileReader()
-    reader.onload = (e) => {
-      resolve(e.target.result)
-    }
-    reader.readAsDataURL(file)
-  })
-}
-
-const uploadNewFile = async (input, previewer) => {
-  if (input.files.length > 0) {
-    await previewer.appendImages([...input.files])
-    previewer.preview()
-  }
-}
-
-const sortImageByName = (images) => {
-  return images.sort((a, b) => Number(a.file.name.replace(/\D/g, '')) - Number(b.file.name.replace(/\D/g, '')))
-}
 
 // Objects
 class Image {
@@ -101,14 +14,13 @@ class Image {
 }
 
 class Previewer {
-  constructor () {
-    this.slider = document.querySelector('.preview-area')
-    this.uploadItem = document.querySelector('.preview-area .upload-item')
+  constructor (sliderElement, uploadItemElement) {
+    this.slider = sliderElement
+    this.uploadItem = uploadItemElement
     this.images = []
   }
 
   async appendImages (files) {
-    const sortType = getSortType()
     const images = []
     const seqOffset = this.images.length + 1
     for (const index in files) {
@@ -117,11 +29,9 @@ class Previewer {
       await image.setBase64()
       images.push(image)
     }
-    const outputImages = [...this.images, ...images]
-    this.images = outputImages
-
-    if (sortType === 'byName') {
-      const sortedImages = sortImageByName(outputImages)
+    this.images = [...this.images, ...images]
+    if (getSortType() === 'byName') {
+      const sortedImages = sortImageByName(this.images)
       sortedImages.forEach((image, index) => image.seq = index + 1)
       this.images = sortedImages
     }
@@ -169,6 +79,7 @@ class Previewer {
 
   remove (seq) {
     this.images = this.images.filter((image) => image.seq !== seq)
+    this.images.forEach((image, index) => image.seq = index + 1)
     this.preview()
   }
 
@@ -179,20 +90,9 @@ class Previewer {
   }
 }
 
-class Canvas {
-  constructor (images) {
-    this.images = images
-  }
-
-  setImages (images) {
-    this.images = images
-  }
-}
-
-
 // main program
 window.addEventListener('load', () => {
-  const previewer = new Previewer()
+  const previewer = new Previewer(document.querySelector('.preview-area'), document.querySelector('.preview-area .upload-item'))
   document.querySelector('#addFileButton').addEventListener('click', triggerUpload)
   document.querySelector('#clearButton').addEventListener('click', previewer.clear.bind(previewer))
   document.querySelector('#submitButton').addEventListener('click', pingtu)
@@ -205,7 +105,6 @@ window.addEventListener('load', () => {
 const pingtu = () => {
   const canvas = document.querySelector('#resultImage')
   if (canvas.getContext) {
-    const resultArea = document.querySelector('.result-area')
     const images = document.querySelectorAll('.real-image')
     const ctx = canvas.getContext('2d')
     let totalHeight = 0
@@ -233,7 +132,7 @@ const pingtu = () => {
         ctx.drawImage(img, totalWidth, totalHeight, thisWidth, thisHeight)
         totalHeight = totalHeight + thisHeight
       })
-      resultArea.classList.remove('hide')
+      showResultArea()
       showWhile('welldone')
     } else {
       showWhile('nothing')
@@ -241,4 +140,38 @@ const pingtu = () => {
   } else {
     alert('網站目前不支援您的瀏覽器')
   }
+}
+
+// helper
+const triggerUpload = () => {
+  document.querySelector('.input-area input[type=file]').click()
+}
+
+const getSortType = () => {
+  return document.querySelector('input[type=radio][name="sort"]:checked').value
+}
+
+const hideResultArea = () => {
+  document.querySelector('.result-area').classList.add('hide')
+}
+
+const showResultArea = () => {
+  document.querySelector('.result-area').classList.remove('hide')
+}
+
+const clearPreviewElement = () => {
+  document.querySelectorAll('.image-container').forEach((container) => {
+    container.remove()
+  })
+}
+
+const uploadNewFile = async (input, previewer) => {
+  if (input.files.length > 0) {
+    await previewer.appendImages([...input.files])
+    previewer.preview()
+  }
+}
+
+const sortImageByName = (images) => {
+  return images.sort((a, b) => Number(a.file.name.replace(/\D/g, '')) - Number(b.file.name.replace(/\D/g, '')))
 }
