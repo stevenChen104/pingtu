@@ -12,7 +12,7 @@ a {
 
 input[type=radio] {
     display: none;
-    &:checked + span {
+    &:checked + label {
         padding: 8px 12px;
         background-color: #2bb4e8;
         border: 1px solid #eee;
@@ -21,7 +21,7 @@ input[type=radio] {
         cursor: pointer;
         font-weight: 600;
     }
-    & + span {
+    & + label {
         padding: 8px 12px;
         background-color: #f5f6f7;
         border: 1px solid #eee;
@@ -126,7 +126,6 @@ button {
 .preview-area {
     display: flex;
     width: 100%;
-    height: 280px;
     background-color: #d8dadb;
     overflow: scroll;
     padding: 20px 0px;
@@ -167,6 +166,7 @@ button {
             width: 100%;
             text-align: center;
             font-size: 14px;
+            margin: 5px;
         }
     }
     .upload-item {
@@ -190,6 +190,7 @@ button {
             text-align: center;
             font-size: 16px;
             color: #696969;
+            margin: 5px;
         }
     }
     .upload-item + span {
@@ -217,11 +218,6 @@ button {
         display: flex;
 
     }
-}
-
-.result-area {
-    width: 100%;
-    overflow: scroll;
 }
 
 .submit-area {
@@ -265,7 +261,6 @@ button {
     .result-image-container {
         margin: 20px 0px;
         width: 100%;
-        overflow: scroll;
     }
 }
 

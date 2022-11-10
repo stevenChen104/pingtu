@@ -31,13 +31,13 @@
                 <div class="sort-area">
                     <div class="sort-container">
                         <div class="sort-item" >
-                            <input type="radio" name="sort" value="byUpload" checked/><span onclick="changeSortType('byUpload')">依上傳順序</span>
+                            <input type="radio" name="sort" id="sortByUpload" value="byUpload" checked/><label for="sortByUpload">依上傳順序</label>
                         </div>
                         <div class="sort-item" >
-                            <input type="radio" name="sort" value="byName" /><span onclick="changeSortType('byName')">依數字檔名</span>
+                            <input type="radio" name="sort" id="sortByName" value="byName" /><label for="sortByName">依數字檔名</label>
                         </div>
                         <div class="sort-item hide" >
-                            <input type="radio" name="sort" value="byUser"/><span onclick="changeSortType('byUser')">自訂</span>
+                            <input type="radio" name="sort" id="sortByUser" value="byUser"/><label for="sortByUser">自訂</label>
                         </div>
                     </div>
                 </div>
@@ -51,15 +51,15 @@
                     </div>
                 </div>
                 <div class="preview-area">
-                    <div class="upload-item" onclick="triggerUpload()">
+                    <div id="addFileButton" class="upload-item">
                         <div class="add-icon"></div>
                         <div class="add-word">新增圖片(可多選)</div>
                     </div>
                     <span></span>
                 </div>
                 <div class="submit-area">
-                    <button id="submitButton" class="grey-button cancel-button" onclick="clearImages()">清除全部</button>
-                    <button id="submitButton" class="blue-button send-button" onclick="pingtu()">開始拼圖</button>
+                    <button id="clearButton" class="grey-button cancel-button">清除全部</button>
+                    <button id="submitButton" class="blue-button send-button">開始拼圖</button>
                 </div>
                 <div class="result-area hide">
                     <div class="gradient-grep"></div>
