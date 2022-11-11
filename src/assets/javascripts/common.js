@@ -3,9 +3,8 @@ import { render, showWhile, getBase64 } from './util.js'
 
 // Objects
 class Image {
-  constructor (file, seq) {
+  constructor (file) {
     this.file = file
-    this.seq = seq
     this.base64 = null
   }
   async setBase64 () {
@@ -22,31 +21,26 @@ class Previewer {
 
   async appendImages (files) {
     const images = []
-    const seqOffset = this.images.length + 1
-    for (const index in files) {
-      const file = files[index]
-      const image = new Image(file, seqOffset + Number(index))
+    for (const file of files) {
+      const image = new Image(file)
       await image.setBase64()
       images.push(image)
     }
     this.images = [...this.images, ...images]
     if (getSortType() === 'byName') {
-      const sortedImages = sortImageByName(this.images)
-      sortedImages.forEach((image, index) => image.seq = index + 1)
-      this.images = sortedImages
+      this.images = sortImageByName(this.images)
     }
   }
 
   preview () {
     clearPreviewElement()
-    this.images.forEach((image) => {
-      this.create(image)
+    this.images.forEach((image, index) => {
+      this.create(image, index)
     })
   }
   
-  create (image) {
+  create (image, idx) {
     const fileName = image.file.name
-    const seq = image.seq
     const base64 = image.base64
     const containerDiv = document.createElement('div')
     const previewImageDiv = document.createElement('div')
@@ -56,15 +50,14 @@ class Previewer {
     const fileNameDiv = document.createElement('div')
 
     removeIconDiv.classList.add('remove-icon')
-    removeIconDiv.dataset.seq = seq
-    removeIconDiv.onclick = () => this.remove(seq)
+    removeIconDiv.onclick = () => this.remove(idx)
     previewImageDiv.classList.add('preview-image')
     previewImageDiv.style.backgroundImage = `url('${base64}')`
     previewImageDiv.appendChild(removeIconDiv)
     realImageImg.classList.add('real-image', 'hide')
     realImageImg.src = base64
     fileSeqDiv.classList.add('file-seq')
-    fileSeqDiv.innerText = seq
+    fileSeqDiv.innerText = idx + 1
     fileNameDiv.classList.add('file-name')
     fileNameDiv.innerText = fileName
     containerDiv.classList.add('image-container')
@@ -77,9 +70,8 @@ class Previewer {
     this.slider.scrollLeft = this.slider.scrollWidth
   }
 
-  remove (seq) {
-    this.images = this.images.filter((image) => image.seq !== seq)
-    this.images.forEach((image, index) => image.seq = index + 1)
+  remove (idx) {
+    this.images.splice(idx, 1); 
     this.preview()
   }
 
