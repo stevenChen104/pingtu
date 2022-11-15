@@ -1,47 +1,45 @@
 import { render, showWhile, getBase64 } from './util.js'
 
 
-// Objects
-class Image {
-  constructor (file) {
-    this.file = file
-    this.base64 = null
+// Interface
+class PreviewerInterface {
+  constructor () {
+    this.name = null
   }
-  async setBase64 () {
-    this.base64 = await getBase64(this.file)
-  }
+  getElement (index) {}
 }
 
-class Previewer {
-  constructor (sliderElement, uploadItemElement) {
-    this.slider = sliderElement
-    this.uploadItem = uploadItemElement
-    this.images = []
-  }
+class ObservableInterface {
+  addObserver(observer) {}
+  removeObserver(observer) {}
+  callObserversRemove() {}
+}
 
-  async appendImages (files) {
-    const images = []
-    for (const file of files) {
-      const image = new Image(file)
-      await image.setBase64()
-      images.push(image)
-    }
-    this.images = [...this.images, ...images]
-    if (getSortType() === 'byName') {
-      this.images = sortImageByName(this.images)
-    }
-  }
+class ObserverInterface {
+  removePreviewer() {}
+}
 
-  preview () {
-    clearPreviewElement()
-    this.images.forEach((image, index) => {
-      this.create(image, index)
-    })
+// js繼承/實作多個得這樣做
+const ObservableInterfaceMixin = (Base) => class extends Base {
+  constructor() {
+    super()
   }
-  
-  create (image, idx) {
-    const fileName = image.file.name
-    const base64 = image.base64
+  addObserver(observer) {}
+  removeObserver(observer) {}
+  callObserversRemove() {}
+}
+
+// Objects
+class Image extends ObservableInterfaceMixin(PreviewerInterface) {
+  constructor (file) {
+    super()
+    this.observers = []
+    this.file = file
+    this.name = file.name
+  }
+  async getElement (index) {
+    const fileName = this.name
+    const base64 = await getBase64(this.file)
     const containerDiv = document.createElement('div')
     const previewImageDiv = document.createElement('div')
     const removeIconDiv = document.createElement('div')
@@ -50,14 +48,14 @@ class Previewer {
     const fileNameDiv = document.createElement('div')
 
     removeIconDiv.classList.add('remove-icon')
-    removeIconDiv.onclick = () => this.remove(idx)
+    removeIconDiv.onclick = () => this.callObserversRemove(index)
     previewImageDiv.classList.add('preview-image')
     previewImageDiv.style.backgroundImage = `url('${base64}')`
     previewImageDiv.appendChild(removeIconDiv)
     realImageImg.classList.add('real-image', 'hide')
     realImageImg.src = base64
     fileSeqDiv.classList.add('file-seq')
-    fileSeqDiv.innerText = idx + 1
+    fileSeqDiv.innerText = index + 1
     fileNameDiv.classList.add('file-name')
     fileNameDiv.innerText = fileName
     containerDiv.classList.add('image-container')
@@ -66,17 +64,62 @@ class Previewer {
     containerDiv.appendChild(fileSeqDiv)
     containerDiv.appendChild(fileNameDiv)
 
-    render(this.uploadItem, containerDiv, 'beforebegin')
+    return containerDiv
+  }
+  addObserver (observer) {
+    this.observers.push(observer)
+  }
+  removeObserver(observer) {
+    const index = array.indexOf(observer)
+    if (index > -1) {
+      this.observers.splice(index, 1)
+    }
+  }
+
+  callObserversRemove(index) {
+    this.observers.forEach((observer) => {
+      observer.removePreviewer(index)
+    })
+  }
+}
+
+class Slider extends ObserverInterface {
+  constructor (sliderElement) {
+    super()
+    this.slider = sliderElement
+    this.previewers = []
+  }
+
+  async appendPreviewer (previewer) {
+    previewer.addObserver(this)
+    this.previewers = [...this.previewers, previewer]
+    if (getSortType() === 'byName') {
+      this.previewers = sortPreviewerByName(this.previewers)
+    }
+  }
+
+  preview () {
+    clearPreviewElement()
+    this.create()
+  }
+  
+  async create (index) {
+    const uploadItem = getUploadItem()
+    for (index in this.previewers) {
+      const previewer = this.previewers[index]
+      const containerDiv = await previewer.getElement(Number(index))
+      render(uploadItem, containerDiv, 'beforebegin')
+    }
     this.slider.scrollLeft = this.slider.scrollWidth
   }
 
-  remove (idx) {
-    this.images.splice(idx, 1); 
+  removePreviewer (index) {
+    this.previewers.splice(index, 1); 
     this.preview()
   }
 
   clear () {
-    this.images = []
+    this.previewers = []
     clearPreviewElement()
     hideResultArea()
   }
@@ -84,12 +127,12 @@ class Previewer {
 
 // main program
 window.addEventListener('load', () => {
-  const previewer = new Previewer(document.querySelector('.preview-area'), document.querySelector('.preview-area .upload-item'))
+  const slider = new Slider(document.querySelector('.preview-area'))
   document.querySelector('#addFileButton').addEventListener('click', triggerUpload)
-  document.querySelector('#clearButton').addEventListener('click', previewer.clear.bind(previewer))
+  document.querySelector('#clearButton').addEventListener('click', slider.clear.bind(slider))
   document.querySelector('#submitButton').addEventListener('click', pingtu)
   document.querySelector('#uploadFile').addEventListener('change', function () {
-    uploadNewFile(this, previewer)
+    uploadNewFile(this, slider)
   })
 })
 
@@ -143,6 +186,10 @@ const getSortType = () => {
   return document.querySelector('input[type=radio][name="sort"]:checked').value
 }
 
+const getUploadItem = () => {
+  return document.querySelector('.preview-area .upload-item')
+}
+
 const hideResultArea = () => {
   document.querySelector('.result-area').classList.add('hide')
 }
@@ -157,13 +204,15 @@ const clearPreviewElement = () => {
   })
 }
 
-const uploadNewFile = async (input, previewer) => {
+const uploadNewFile = (input, slider) => {
   if (input.files.length > 0) {
-    await previewer.appendImages([...input.files])
-    previewer.preview()
+    [...input.files].forEach((file) => {
+      slider.appendPreviewer(new Image(file))
+    })
+    slider.preview()
   }
 }
 
-const sortImageByName = (images) => {
-  return images.sort((a, b) => Number(a.file.name.replace(/\D/g, '')) - Number(b.file.name.replace(/\D/g, '')))
+const sortPreviewerByName = (previewer) => {
+  return previewer.sort((a, b) => Number(a.name.replace(/\D/g, '')) - Number(b.name.replace(/\D/g, '')))
 }
