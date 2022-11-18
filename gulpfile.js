@@ -2,8 +2,10 @@ const gulp = require('gulp');
 const concat = require('gulp-concat');
 const gulpSass = require('gulp-sass');
 const terser = require('gulp-terser');
-const fileinclude = require('gulp-file-include'); 
-const express = require('./app.js')
+const fileinclude = require('gulp-file-include');
+var ts = require("gulp-typescript");
+var tsProject = ts.createProject("tsconfig.json");
+const express = require('./app.js');
 
 gulp.task('html', function (){
     return gulp.src('src/views/*.html')
@@ -31,6 +33,13 @@ gulp.task('config', function (){
         .pipe(gulp.dest('dist/config')); // 輸出路徑'
 });
 
+
+gulp.task("ts", function () {
+    return tsProject.src().pipe(tsProject()).js
+        .pipe(terser())  // uglify
+        .pipe(gulp.dest('dist/javascripts')); // 輸出路徑'
+});
+
 gulp.task('js', function (){
     return gulp.src('src/assets/javascripts/**/*.js')
         // .pipe(concat('custom.js')) // 將多個js檔串成一個，打包起來輸出的檔案名稱
@@ -56,6 +65,7 @@ gulp.task('styles', function () {
 gulp.task('watch', function() {
     gulp.watch('src/views/**/*.html', gulp.series('html'));
     gulp.watch('src/assets/config/**/*.js', gulp.series('config'));
+    gulp.watch('src/assets/javascripts/**/*.ts', gulp.series('ts'));
     gulp.watch('src/assets/javascripts/**/*.js', gulp.series('js'));
     gulp.watch('src/assets/stylesheets/**/*.scss', gulp.series('styles'));
     gulp.watch('src/assets/data/*', gulp.series('data'));
@@ -63,6 +73,6 @@ gulp.task('watch', function() {
 });
 
 // gulp 要做的 task 列表，gulp 會依照順序執行
-gulp.task('default', gulp.series('html','images','data','config','js_package','js','styles','watch'), function(){
+gulp.task('default', gulp.series('html','images','data','config','js_package','ts','js','styles','watch'), function(){
     gulp.run('express');
 });
