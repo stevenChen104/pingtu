@@ -1,45 +1,35 @@
 import { render, showWhile, getBase64 } from './util.js'
 
+class PreviewerHandlerInterface { //Observer
+  handle () {}
+}
 
-// Interface
-class PreviewerInterface {
+// js繼承/實作多個得這樣做
+class PreviewerInterface extends EventTarget {
   constructor () {
+    super()
     this.name = null
   }
   getElement (index) {}
 }
 
-class ObservableInterface {
-  addObserver(observer) {}
-  removeObserver(observer) {}
-  callObserversRemove() {}
-}
-
-class ObserverInterface {
-  removePreviewer() {}
-}
-
-// js繼承/實作多個得這樣做
-const ObservableInterfaceMixin = (Base) => class extends Base {
-  constructor() {
-    super()
-  }
-  addObserver(observer) {}
-  removeObserver(observer) {}
-  callObserversRemove() {}
-}
-
 // Objects
-class Image extends ObservableInterfaceMixin(PreviewerInterface) {
+class Image extends PreviewerInterface {
   constructor (file) {
     super()
     this.observers = []
     this.file = file
     this.name = file.name
+    this.encoded = null
+  }
+  async getEncodedFile() {
+    if (this.encoded) return this.encoded
+    this.encoded = await getBase64(this.file)
+    return this.encoded
   }
   async getElement (index) {
     const fileName = this.name
-    const base64 = await getBase64(this.file)
+    const base64 = await this.getEncodedFile()
     const containerDiv = document.createElement('div')
     const previewImageDiv = document.createElement('div')
     const removeIconDiv = document.createElement('div')
@@ -48,7 +38,10 @@ class Image extends ObservableInterfaceMixin(PreviewerInterface) {
     const fileNameDiv = document.createElement('div')
 
     removeIconDiv.classList.add('remove-icon')
-    removeIconDiv.onclick = () => this.callObserversRemove(index)
+    removeIconDiv.onclick = () => {
+      const event = new CustomEvent('remove', { detail: index })
+      this.dispatchEvent(event)
+    }
     previewImageDiv.classList.add('preview-image')
     previewImageDiv.style.backgroundImage = `url('${base64}')`
     previewImageDiv.appendChild(removeIconDiv)
@@ -66,32 +59,18 @@ class Image extends ObservableInterfaceMixin(PreviewerInterface) {
 
     return containerDiv
   }
-  addObserver (observer) {
-    this.observers.push(observer)
-  }
-  removeObserver(observer) {
-    const index = array.indexOf(observer)
-    if (index > -1) {
-      this.observers.splice(index, 1)
-    }
-  }
-
-  callObserversRemove(index) {
-    this.observers.forEach((observer) => {
-      observer.removePreviewer(index)
-    })
-  }
 }
 
-class Slider extends ObserverInterface {
+class Slider extends PreviewerHandlerInterface {
   constructor (sliderElement) {
     super()
     this.slider = sliderElement
     this.previewers = []
+    this.removeHandler = (event) => this.handle(event)
   }
 
   async appendPreviewer (previewer) {
-    previewer.addObserver(this)
+    previewer.addEventListener('remove', this.removeHandler)
     this.previewers = [...this.previewers, previewer]
     if (getSortType() === 'byName') {
       this.previewers = sortPreviewerByName(this.previewers)
@@ -113,12 +92,17 @@ class Slider extends ObserverInterface {
     this.slider.scrollLeft = this.slider.scrollWidth
   }
 
-  removePreviewer (index) {
-    this.previewers.splice(index, 1); 
+  handle (event) {
+    const index = event.detail
+    const deleted = this.previewers.splice(index, 1)
+    deleted[0].removeEventListener('remove', this.removeHandler)
     this.preview()
   }
 
   clear () {
+    this.previewers.forEach((previewer) => {
+      previewer.removeEventListener('remove', this.removeHandler)
+    })
     this.previewers = []
     clearPreviewElement()
     hideResultArea()
@@ -207,7 +191,8 @@ const clearPreviewElement = () => {
 const uploadNewFile = (input, slider) => {
   if (input.files.length > 0) {
     [...input.files].forEach((file) => {
-      slider.appendPreviewer(new Image(file))
+      const image = new Image(file)
+      slider.appendPreviewer(image)
     })
     slider.preview()
   }
