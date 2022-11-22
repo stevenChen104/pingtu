@@ -1,7 +1,17 @@
 {
-  "files": ["src/assets/javascripts/*.ts"],
+  "include": ["src/assets/javascripts/*.ts"],
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "display": "Node 14",
+
   "compilerOptions": {
-    "noImplicitAny": true,
-    "target": "es6"
+    "lib": ["ESNext", "DOM"],
+    "module": "ES2015",
+    "target": "ES2017",
+
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "noImplicitThis": false
   }
 }
