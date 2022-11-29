@@ -68,7 +68,7 @@ class Image extends EventTarget implements PreviewerInterface {
 class Slider implements PreviewerHandlerInterface {
     slider: HTMLElement;
     previewers: Array<Image>;
-    removeHandler(event: Event) {};
+    removeHandler: (event: Event) => void;
 
     constructor(sliderElement: HTMLElement) {
         this.slider = sliderElement
@@ -210,6 +210,5 @@ const uploadNewFile = (input: any, slider: Slider): void => {
 }
 
 const sortPreviewerByName = (previewer: any) => {
-  console.log(typeof previewer)
     return previewer.sort((a: any, b: any) => Number(a.name.replace(/\D/g, '')) - Number(b.name.replace(/\D/g, '')))
 }

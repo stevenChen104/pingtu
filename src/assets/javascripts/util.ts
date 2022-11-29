@@ -24,7 +24,7 @@ export const render = (node: HTMLElement, appendElement: HTMLElement, position: 
       el.style.opacity = `${+el.style.opacity + (new Date().valueOf() - last) / 100}`
       last = +new Date()
       if (+el.style.opacity < 1) {
-        (window.requestAnimationFrame(()=>{}) && requestAnimationFrame(tick)) || setTimeout(tick, 1)
+        (requestAnimationFrame && requestAnimationFrame(tick)) || setTimeout(tick, 1)
       } else {
         el.style.opacity = '1'
       }
@@ -39,7 +39,7 @@ export const render = (node: HTMLElement, appendElement: HTMLElement, position: 
       el.style.opacity = `${+el.style.opacity - (new Date().valueOf() - last) / 100}`
       last = +new Date()
       if (+el.style.opacity > 0) {
-        (window.requestAnimationFrame(()=>{}) && requestAnimationFrame(tick)) || setTimeout(tick, 1)
+        (requestAnimationFrame && requestAnimationFrame(tick)) || setTimeout(tick, 1)
       } else {
         el.style.opacity = '0'
         el.classList.add('hide')
