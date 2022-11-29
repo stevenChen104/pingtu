@@ -79,6 +79,9 @@ class Slider implements PreviewerHandlerInterface {
     async appendPreviewer(previewer: Previewer) {
         previewer.addEventListener('remove', this.removeHandler)
         this.previewers = [...this.previewers, previewer]
+    }
+
+    sort(){
         if (getSortType() === 'byName') {
             this.previewers = sortPreviewerByName(this.previewers)
         }
@@ -204,6 +207,7 @@ const uploadNewFile = (input: any, slider: Slider): void => {
         [...input.files].forEach((file) => {
             const previewer = new Previewer(file)
             slider.appendPreviewer(previewer)
+            slider.sort()
         })
         slider.preview()
     }
