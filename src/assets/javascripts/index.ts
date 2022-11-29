@@ -12,7 +12,7 @@ interface PreviewerInterface {
 }
 
 // Objects
-class Image extends EventTarget implements PreviewerInterface {
+class Previewer extends EventTarget implements PreviewerInterface {
     observers: Array<EventTarget>
     file: File
     name: string
@@ -67,7 +67,7 @@ class Image extends EventTarget implements PreviewerInterface {
 
 class Slider implements PreviewerHandlerInterface {
     slider: HTMLElement;
-    previewers: Array<Image>;
+    previewers: Array<Previewer>;
     removeHandler: (event: Event) => void;
 
     constructor(sliderElement: HTMLElement) {
@@ -76,7 +76,7 @@ class Slider implements PreviewerHandlerInterface {
         this.removeHandler = (event) => this.handle(event)
     }
 
-    async appendPreviewer(previewer: Image) {
+    async appendPreviewer(previewer: Previewer) {
         previewer.addEventListener('remove', this.removeHandler)
         this.previewers = [...this.previewers, previewer]
         if (getSortType() === 'byName') {
@@ -101,7 +101,7 @@ class Slider implements PreviewerHandlerInterface {
 
     handle(event: any) {
         const index = event.detail
-        const deleted = this.previewers.splice(index, 1)  as Array<Image>
+        const deleted = this.previewers.splice(index, 1) as Array<Previewer>
         deleted[0].removeEventListener('remove', this.removeHandler)
         this.preview()
     }
@@ -202,8 +202,8 @@ const clearPreviewElement = (): void => {
 const uploadNewFile = (input: any, slider: Slider): void => {
     if (input.files.length > 0) {
         [...input.files].forEach((file) => {
-            const image = new Image(file)
-            slider.appendPreviewer(image)
+            const previewer = new Previewer(file)
+            slider.appendPreviewer(previewer)
         })
         slider.preview()
     }
